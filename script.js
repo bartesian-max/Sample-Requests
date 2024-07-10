@@ -3,11 +3,13 @@ let skuData = { "Canada": [], "United States": [] };
 $(document).ready(function() {
   loadSkuData();
   $('#country').change(updateCountrySpecificFields);
+  $('#sampleType').val('144 Marketing Samples'); // Set default sample type
+  $('#country').val('United States'); // Set default country
   $('#country').trigger('change'); // Initialize fields based on default country
 });
 
 function loadSkuData() {
-  Papa.parse('/mnt/data/SKUs.csv', {
+  Papa.parse('SKUs.csv', {
     download: true,
     header: true,
     complete: function(results) {
@@ -19,6 +21,7 @@ function loadSkuData() {
           skuData["Canada"].push({ DisplayName: row.DisplayNameCanada, ItemCode: row.ItemCodeCanada });
         }
       });
+      updateCountrySpecificFields(); // Ensure initial SKU options are loaded
     }
   });
 }
@@ -49,10 +52,8 @@ function updateLocationAndShippingMethod(country) {
 
 function updateSkuOptions(country) {
   const skus = skuData[country] || [];
-  $('#skuGrid').empty();
-  skus.forEach(sku => {
-    $('#skuGrid').append(`<option value="${sku.ItemCode}">${sku.DisplayName}</option>`);
-  });
+  $('#skuList').empty();
+  addSkuRow(); // Add an initial row immediately when the country changes
 }
 
 function addSkuRow() {
@@ -60,13 +61,45 @@ function addSkuRow() {
   const skus = skuData[country] || [];
 
   const skuSelect = $('<select>').append(skus.map(sku => `<option value="${sku.ItemCode}">${sku.DisplayName}</option>`));
-  const quantityInput = $('<input>').attr('type', 'number').attr('min', '1').attr('placeholder', 'Quantity');
+  const quantityInput = $('<input>').attr('type', 'number').attr('min', '1').attr('placeholder', 'Quantity').attr('required', 'required');
 
-  const row = $('<div>').append(skuSelect, quantityInput);
-  $('#skuGrid').append(row);
+  const row = $('<div class="sku-row">').append(skuSelect, quantityInput);
+  $('#skuList').append(row);
+}
+
+function validateForm() {
+  let isValid = true;
+  const requiredFields = ['#name', '#address1', '#city', '#state', '#zip', '#sampleType', '#country', '#shippingMethod'];
+  
+  requiredFields.forEach(selector => {
+    if ($(selector).val().trim() === '') {
+      isValid = false;
+      $(selector).css('border', '1px solid red');
+    } else {
+      $(selector).css('border', '');
+    }
+  });
+
+  $('#skuList .sku-row').each(function() {
+    const sku = $(this).find('select').val();
+    const quantity = $(this).find('input').val();
+    if (sku.trim() === '' || quantity.trim() === '') {
+      isValid = false;
+      $(this).find('select, input').css('border', '1px solid red');
+    } else {
+      $(this).find('select, input').css('border', '');
+    }
+  });
+
+  return isValid;
 }
 
 function generateCSV() {
+  if (!validateForm()) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+
   const name = $('#name').val();
   const address1 = $('#address1').val();
   const address2 = $('#address2').val();
@@ -80,7 +113,7 @@ function generateCSV() {
   const location = (country === 'Canada') ? 'Shipbob - Brampton FC' : 'Tagg - Bolingbrook FC';
 
   let csvContent = `Name,Attention Line,Address Line 1,Address Line 2,City,State,Zip Code,Country,Location,Sample Type,Shipping Method,SKU,Quantity\n`;
-  $('#skuGrid > div').each(function() {
+  $('#skuList > .sku-row').each(function() {
     const sku = $(this).find('select').val();
     const quantity = $(this).find('input').val();
     csvContent += `${name},${attentionLine},${address1},${address2},${city},${state},${zip},${country},${location},${sampleType},${shippingMethod},${sku},${quantity}\n`;

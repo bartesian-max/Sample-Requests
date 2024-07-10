@@ -7,18 +7,16 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
   <style>
-    .sku-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
+    .sku-list {
       margin-bottom: 20px;
     }
-    .sku-grid div {
+    .sku-row {
       display: flex;
       align-items: center;
+      margin-bottom: 10px;
     }
-    .sku-grid input {
-      margin-left: 10px;
+    .sku-row select, .sku-row input {
+      margin-right: 10px;
     }
   </style>
 </head>
@@ -28,13 +26,13 @@
     <label for="sampleType">Sample Type:</label>
     <select id="sampleType" name="sampleType" required>
       <option value="143 Commercial Samples">Commercial/B2B</option>
-      <option value="144 Marketing Samples">Influencer/Marketing</option>
+      <option value="144 Marketing Samples" selected>Influencer/Marketing</option>
     </select><br><br>
 
     <label for="country">Country:</label>
     <select id="country" name="country" required>
       <option value="Canada">Canada</option>
-      <option value="United States">United States</option>
+      <option value="United States" selected>United States</option>
     </select><br><br>
 
     <label for="attentionLine">Attention Line:</label>
@@ -62,7 +60,7 @@
     <select id="shippingMethod" name="shippingMethod" required></select><br><br>
 
     <h3>SKUs</h3>
-    <div id="skuGrid" class="sku-grid">
+    <div id="skuList" class="sku-list">
       <!-- SKU rows will be added here -->
     </div>
     <button type="button" onclick="addSkuRow()">Add SKU</button><br><br>
