@@ -4,23 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sample Request Form</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <style>
+    .sku-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .sku-grid div {
+      display: flex;
+      align-items: center;
+    }
+    .sku-grid input {
+      margin-left: 10px;
+    }
+  </style>
 </head>
 <body>
   <h1>Sample Request Form</h1>
   <form id="sampleRequestForm">
+    <label for="sampleType">Sample Type:</label>
+    <select id="sampleType" name="sampleType" required>
+      <option value="143 Commercial Samples">Commercial/B2B</option>
+      <option value="144 Marketing Samples">Influencer/Marketing</option>
+    </select><br><br>
+
+    <label for="country">Country:</label>
+    <select id="country" name="country" required>
+      <option value="Canada">Canada</option>
+      <option value="United States">United States</option>
+    </select><br><br>
+
+    <label for="attentionLine">Attention Line:</label>
+    <input type="text" id="attentionLine" name="attentionLine"><br><br>
+
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" required><br><br>
-    
-    <label for="address">Address:</label>
-    <input type="text" id="address" name="address" required><br><br>
-    
-    <label for="sku">SKU:</label>
-    <select id="sku" name="sku">
-      <option value="SKU1">SKU1</option>
-      <option value="SKU2">SKU2</option>
-      <!-- Add more SKUs as needed -->
-    </select><br><br>
-    
+
+    <label for="address1">Address Line 1:</label>
+    <input type="text" id="address1" name="address1" required><br><br>
+
+    <label for="address2">Address Line 2:</label>
+    <input type="text" id="address2" name="address2"><br><br>
+
+    <label for="city">City:</label>
+    <input type="text" id="city" name="city" required><br><br>
+
+    <label for="state">State:</label>
+    <input type="text" id="state" name="state" required><br><br>
+
+    <label for="zip">Zip Code:</label>
+    <input type="text" id="zip" name="zip" required><br><br>
+
+    <label for="shippingMethod">Shipping Method:</label>
+    <select id="shippingMethod" name="shippingMethod" required></select><br><br>
+
+    <h3>SKUs</h3>
+    <div id="skuGrid" class="sku-grid">
+      <!-- SKU rows will be added here -->
+    </div>
+    <button type="button" onclick="addSkuRow()">Add SKU</button><br><br>
+
     <button type="button" onclick="generateCSV()">Submit</button>
   </form>
 
