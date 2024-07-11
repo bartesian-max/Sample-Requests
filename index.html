@@ -4,69 +4,139 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sample Central</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
   <style>
-    .sku-list {
-      margin-bottom: 20px;
+    .container {
+      max-width: 1000px;
+      margin-top: 50px;
     }
     .sku-row {
       display: flex;
       align-items: center;
       margin-bottom: 10px;
     }
-    .sku-row select, .sku-row input {
+    .sku-row select {
+      flex: 3;
       margin-right: 10px;
+    }
+    .sku-row input {
+      flex: 1;
+      width: 60px;
+      margin-right: 10px;
+    }
+    .sku-row button {
+      margin-right: 10px;
+    }
+    #mainForm {
+      display: none;
+    }
+    .subheader {
+      font-weight: bold;
+      font-size: 1.25rem;
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    .select2-container--default .select2-selection--single {
+      height: 38px;
+      padding: 6px 12px;
+      border: 1px solid #ced4da;
+    }
+    .select2-container {
+      width: 100% !important;
     }
   </style>
 </head>
 <body>
-  <h1>Sample Central</h1>
-  <form id="sampleRequestForm">
-    <label for="sampleType">Sample Type:</label>
-    <select id="sampleType" name="sampleType" required>
-      <option value="143 Commercial Samples">Commercial/B2B</option>
-      <option value="144 Marketing Samples" selected>Influencer/Marketing</option>
-    </select><br><br>
-
-    <label for="country">Country:</label>
-    <select id="country" name="country" required>
-      <option value="Canada">Canada</option>
-      <option value="United States" selected>United States</option>
-    </select><br><br>
-
-    <label for="attentionLine">Attention Line:</label>
-    <input type="text" id="attentionLine" name="attentionLine"><br><br>
-
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required><br><br>
-
-    <label for="address1">Address Line 1:</label>
-    <input type="text" id="address1" name="address1" required><br><br>
-
-    <label for="address2">Address Line 2:</label>
-    <input type="text" id="address2" name="address2"><br><br>
-
-    <label for="city">City:</label>
-    <input type="text" id="city" name="city" required><br><br>
-
-    <label for="state">State:</label>
-    <input type="text" id="state" name="state" required><br><br>
-
-    <label for="zip">Zip Code:</label>
-    <input type="text" id="zip" name="zip" required><br><br>
-
-    <label for="shippingMethod">Shipping Method:</label>
-    <select id="shippingMethod" name="shippingMethod" required></select><br><br>
-
-    <h3>SKUs</h3>
-    <div id="skuList" class="sku-list">
-      <!-- SKU rows will be added here -->
+  <div class="container">
+    <h1 class="text-center">Sample Central</h1>
+    
+    <div id="preScreen" class="text-center">
+      <label for="userName" class="font-weight-bold">Select your name:</label>
+      <select id="userName" name="userName" class="form-control d-inline w-auto" required>
+        <option value="" selected disabled>Select your name</option>
+        <option value="Gianna">Gianna</option>
+        <option value="Rebecca">Rebecca</option>
+      </select>
+      <button type="button" class="btn btn-primary mt-3" onclick="proceed()">Proceed</button>
     </div>
-    <button type="button" onclick="addSkuRow()">Add SKU</button><br><br>
 
-    <button type="button" onclick="generateCSV()">Submit</button>
-  </form>
+    <div id="mainForm">
+      <form id="sampleRequestForm">
+        <div class="row">
+          <div class="col-md-7">
+            <div class="subheader">Shipment Information</div>
+            <div class="form-group">
+              <label for="sampleType" class="font-weight-bold">Sample Type:</label>
+              <select id="sampleType" name="sampleType" class="form-control" required>
+                <option value="143 Commercial Samples">Commercial/B2B</option>
+                <option value="144 Marketing Samples" selected>Influencer/Marketing</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="country" class="font-weight-bold">Country:</label>
+              <select id="country" name="country" class="form-control" required>
+                <option value="Canada">Canada</option>
+                <option value="United States" selected>United States</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="attentionLine" class="font-weight-bold">Attention Line:</label>
+              <input type="text" id="attentionLine" name="attentionLine" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="name" class="font-weight-bold">Name:</label>
+              <input type="text" id="name" name="name" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="address1" class="font-weight-bold">Address Line 1:</label>
+              <input type="text" id="address1" name="address1" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="address2" class="font-weight-bold">Address Line 2:</label>
+              <input type="text" id="address2" name="address2" class="form-control">
+            </div>
+
+            <div class="form-group">
+              <label for="city" class="font-weight-bold">City:</label>
+              <input type="text" id="city" name="city" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="state" class="font-weight-bold">State:</label>
+              <input type="text" id="state" name="state" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="zip" class="font-weight-bold">Zip Code:</label>
+              <input type="text" id="zip" name="zip" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+              <label for="shippingMethod" class="font-weight-bold">Shipping Method:</label>
+              <select id="shippingMethod" name="shippingMethod" class="form-control" required></select>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="subheader">SKUs to Ship</div>
+            <div id="skuList" class="sku-list">
+              <!-- SKU rows will be added here -->
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addSkuRow()">Add SKU</button><br><br>
+          </div>
+        </div>
+        <button type="button" class="btn btn-success" onclick="generateCSV()">Submit</button>
+      </form>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
