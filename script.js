@@ -72,7 +72,7 @@ function addSkuRow() {
   const skus = skuData[country] || [];
 
   const skuSelect = $('<select required class="form-control sku-select">').append(skus.map(sku => `<option value="${sku.ItemCode}">${sku.DisplayName}</option>`));
-  const quantityInput = $('<input>').attr('type', 'number').attr('min', '1').attr('placeholder', 'Qty').attr('required', 'required').addClass('form-control qty-input').css('width', '180px');
+  const quantityInput = $('<input>').attr('type', 'number').attr('min', '1').attr('placeholder', 'Qty').attr('required', 'required').addClass('form-control qty-input').css('width', '90px');
   const deleteButton = $('<button type="button" class="btn btn-danger">Delete</button>').click(function() {
     $(this).parent().remove();
   });
@@ -171,6 +171,7 @@ function generateCSV() {
   });
 
   downloadCSV(csvContent, `Sample Request ${poNumber}.csv`);
+  showSuccessMessage(poNumber);
 }
 
 function downloadCSV(csvContent, filename) {
@@ -182,4 +183,8 @@ function downloadCSV(csvContent, filename) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+}
+
+function showSuccessMessage(poNumber) {
+  $('#successMessage').text(`Thank you! Your order number is: ${poNumber}`).show();
 }
