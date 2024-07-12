@@ -63,7 +63,7 @@ function loadSkuData() {
       results.data.forEach(row => {
         console.log(row);
         if (row.DisplayNameUSA && row.ItemCodeUSA) {
-          let isBundleUSA = row.IsBundleUSA.trim().toLowerCase() === 'true';
+          let isBundleUSA = row.IsBundleUSA && row.IsBundleUSA.trim().toLowerCase() === 'true';
           if (isBundleUSA) {
             skuData["Bundles"]["United States"].push({ DisplayName: row.DisplayNameUSA, ItemCode: row.ItemCodeUSA });
           } else {
@@ -72,7 +72,7 @@ function loadSkuData() {
         }
 
         if (row.DisplayNameCanada && row.ItemCodeCanada) {
-          let isBundleCanada = row.IsBundleCanada.trim().toLowerCase() === 'true';
+          let isBundleCanada = row.IsBundleCanada && row.IsBundleCanada.trim().toLowerCase() === 'true';
           if (isBundleCanada) {
             skuData["Bundles"]["Canada"].push({ DisplayName: row.DisplayNameCanada, ItemCode: row.ItemCodeCanada });
           } else {
