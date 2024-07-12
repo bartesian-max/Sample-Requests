@@ -4,6 +4,20 @@ let selectedUserName = '';
 let currentSkus = [];
 let currentBundles = [];
 
+const usStates = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 
+  'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 
+  'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 
+  'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 
+  'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 
+  'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+];
+
+const caProvinces = [
+  'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 
+  'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'
+];
+
 $(document).ready(function() {
   loadSkuData();
   loadBundleContents();
@@ -16,12 +30,17 @@ $(document).ready(function() {
   });
   
   // Add event listeners for required fields
-  $('#name, #address1, #city, #state, #zip').on('focus', function() {
+  $('#name, #address1, #city, #zip').on('focus', function() {
     $(this).attr('placeholder', '');
   }).on('blur', function() {
     if ($(this).val().trim() === '') {
       $(this).attr('placeholder', 'Required');
     }
+  });
+
+  $('#state').select2({
+    placeholder: 'Select a state',
+    allowClear: true
   });
 });
 
@@ -92,6 +111,7 @@ function updateCountrySpecificFields() {
   const country = $('#country').val();
   updateLocationAndShippingMethod(country);
   updateSkuOptions(country);
+  updateStateOptions(country);
 }
 
 function updateLocationAndShippingMethod(country) {
@@ -109,6 +129,15 @@ function updateLocationAndShippingMethod(country) {
   shippingMethods.forEach(method => {
     $('#shippingMethod').append(`<option value="${method}">${method}</option>`);
   });
+}
+
+function updateStateOptions(country) {
+  $('#state').empty();
+  const options = country === 'Canada' ? caProvinces : usStates;
+  options.forEach(state => {
+    $('#state').append(new Option(state, state));
+  });
+  $('#state').val(null).trigger('change'); // Reset and initialize the select2 dropdown
 }
 
 function updateSkuOptions(country) {
@@ -260,4 +289,13 @@ function downloadCSV(csvContent, filename) {
 function showSuccessMessage(poNumber) {
   $('#orderNumber').text(poNumber);
   $('#successMessage').show();
+}
+
+function copyOrderNumber() {
+  const poNumber = $('#orderNumber').text();
+  navigator.clipboard.writeText(poNumber).then(() => {
+    alert('Order number copied to clipboard!');
+  }, err => {
+    console.error('Failed to copy text: ', err);
+  });
 }

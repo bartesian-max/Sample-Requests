@@ -88,6 +88,12 @@
       font-weight: bold;
       color: green;
     }
+    #copyOrderNumberBtn {
+      margin-left: 10px;
+      background-color: lightgray;
+      border-color: lightgray;
+      color: green;
+    }
     .form-control::placeholder {
       color: lightgray;
     }
@@ -154,7 +160,7 @@
                 </div>
                 <div class="form-group">
                   <label for="state" class="font-weight-bold">State:</label>
-                  <input type="text" id="state" name="state" class="form-control" required placeholder="Required">
+                  <select id="state" name="state" class="form-control" required></select>
                 </div>
                 <div class="form-group">
                   <label for="zip" class="font-weight-bold">Zip Code:</label>
@@ -183,7 +189,10 @@
       </form>
     </div>
 
-    <div id="successMessage">Thank you! Your order number is: <span id="orderNumber"></span></div>
+    <div id="successMessage">
+      Thank you! Your order number is: <span id="orderNumber"></span>
+      <button type="button" class="btn btn-secondary" id="copyOrderNumberBtn" onclick="copyOrderNumber()">Copy Order #</button>
+    </div>
 
     <!-- Modal -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
