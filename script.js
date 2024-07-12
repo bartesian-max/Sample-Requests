@@ -1,12 +1,28 @@
-let skuData = { "Canada": [], "United States": [] };
+let skuData = { "Canada": [], "United States": [], "Bundles": { "Canada": [], "United States": [] } };
+let bundleContents = {};
 let selectedUserName = '';
+let currentSkus = [];
+let currentBundles = [];
 
 $(document).ready(function() {
   loadSkuData();
+  loadBundleContents();
   $('#country').change(updateCountrySpecificFields);
   $('#sampleType').val('144 Marketing Samples'); // Set default sample type
   $('#country').val('United States'); // Set default country
   $('#country').trigger('change'); // Initialize fields based on default country
+  $('#addSkuButton').click(function() {
+    addSkuRow();
+  });
+  
+  // Add event listeners for required fields
+  $('#name, #address1, #city, #state, #zip').on('focus', function() {
+    $(this).attr('placeholder', '');
+  }).on('blur', function() {
+    if ($(this).val().trim() === '') {
+      $(this).attr('placeholder', 'Required');
+    }
+  });
 });
 
 function proceed() {
@@ -24,15 +40,50 @@ function loadSkuData() {
     download: true,
     header: true,
     complete: function(results) {
+      console.log("SKU Data Loaded:", results.data);
       results.data.forEach(row => {
+        console.log(row);
         if (row.DisplayNameUSA && row.ItemCodeUSA) {
-          skuData["United States"].push({ DisplayName: row.DisplayNameUSA, ItemCode: row.ItemCodeUSA });
+          let isBundleUSA = row.IsBundleUSA.trim().toLowerCase() === 'true';
+          if (isBundleUSA) {
+            skuData["Bundles"]["United States"].push({ DisplayName: row.DisplayNameUSA, ItemCode: row.ItemCodeUSA });
+          } else {
+            skuData["United States"].push({ DisplayName: row.DisplayNameUSA, ItemCode: row.ItemCodeUSA });
+          }
         }
+
         if (row.DisplayNameCanada && row.ItemCodeCanada) {
-          skuData["Canada"].push({ DisplayName: row.DisplayNameCanada, ItemCode: row.ItemCodeCanada });
+          let isBundleCanada = row.IsBundleCanada.trim().toLowerCase() === 'true';
+          if (isBundleCanada) {
+            skuData["Bundles"]["Canada"].push({ DisplayName: row.DisplayNameCanada, ItemCode: row.ItemCodeCanada });
+          } else {
+            skuData["Canada"].push({ DisplayName: row.DisplayNameCanada, ItemCode: row.ItemCodeCanada });
+          }
         }
       });
-      updateCountrySpecificFields(); // Ensure initial SKU options are loaded
+      updateCountrySpecificFields();
+    },
+    error: function(err) {
+      console.error("Error loading SKU data:", err);
+    }
+  });
+}
+
+function loadBundleContents() {
+  Papa.parse('Bundles.csv', {
+    download: true,
+    header: true,
+    complete: function(results) {
+      console.log("Bundle Contents:", results.data);
+      results.data.forEach(row => {
+        if (!bundleContents[row.BundleCode]) {
+          bundleContents[row.BundleCode] = [];
+        }
+        bundleContents[row.BundleCode].push({ ItemCode: row.ItemCode, Quantity: row.Quantity });
+      });
+    },
+    error: function(err) {
+      console.error("Error loading bundle contents:", err);
     }
   });
 }
@@ -54,7 +105,6 @@ function updateLocationAndShippingMethod(country) {
     shippingMethods = ['FEDEXG', 'FEDEX2D', 'FEDEXND'];
   }
 
-  // Update shipping method dropdown
   $('#shippingMethod').empty();
   shippingMethods.forEach(method => {
     $('#shippingMethod').append(`<option value="${method}">${method}</option>`);
@@ -62,17 +112,20 @@ function updateLocationAndShippingMethod(country) {
 }
 
 function updateSkuOptions(country) {
-  const skus = skuData[country] || [];
+  currentSkus = skuData[country] || [];
+  currentBundles = skuData["Bundles"][country] || [];
+  console.log(`Updating SKU options for ${country}. Regular SKUs: ${currentSkus.length}, Bundles: ${currentBundles.length}`);
   $('#skuList').empty();
-  addSkuRow(); // Add an initial row immediately when the country changes
+  addSkuRow();
 }
 
 function addSkuRow() {
-  const country = $('#country').val();
-  const skus = skuData[country] || [];
-
-  const skuSelect = $('<select required class="form-control sku-select">').append(skus.map(sku => `<option value="${sku.ItemCode}">${sku.DisplayName}</option>`));
-  const quantityInput = $('<input>').attr('type', 'number').attr('min', '1').attr('placeholder', 'Qty').attr('required', 'required').addClass('form-control qty-input').css('width', '90px');
+  const allOptions = [...currentBundles, ...currentSkus]; // Bundles first, then regular SKUs
+  const skuSelect = $('<select required class="form-control sku-select">').append(
+    $('<option value="">Select an item</option>'),
+    allOptions.map(sku => `<option value="${sku.ItemCode}">${sku.DisplayName}</option>`)
+  );
+  const quantityInput = $('<input type="number" min="1" placeholder="Qty" required class="form-control qty-input" style="width: 90px;">');
   const deleteButton = $('<button type="button" class="btn btn-danger">Delete</button>').click(function() {
     $(this).parent().remove();
   });
@@ -80,33 +133,45 @@ function addSkuRow() {
   const row = $('<div class="sku-row">').append(skuSelect, quantityInput, deleteButton);
   $('#skuList').append(row);
 
-  // Initialize Select2 on the new SKU select element
   skuSelect.select2({
     matcher: function(params, data) {
-      // If there are no search terms, return all data
-      if ($.trim(params.term) === '') {
-        return data;
-      }
-
-      // Make the search case-insensitive
-      if (typeof data.text === 'undefined') {
-        return null;
-      }
-
-      // Perform wildcard search
-      const term = params.term.toLowerCase();
-      const text = data.text.toLowerCase();
-      if (text.indexOf(term) > -1) {
-        const modifiedData = $.extend({}, data, true);
-        return modifiedData;
-      }
-
-      // Return `null` if the term should not be displayed
+      if ($.trim(params.term) === '') return data;
+      if (typeof data.text === 'undefined') return null;
+      if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) return data;
       return null;
+    }
+  });
+
+  skuSelect.change(function() {
+    const selectedSku = $(this).val();
+    if (bundleContents[selectedSku]) {
+      $(this).parent().remove();
+      bundleContents[selectedSku].forEach(bundleItem => {
+        const bundleSku = allOptions.find(sku => sku.ItemCode === bundleItem.ItemCode);
+        if (bundleSku) {
+          addBundleItem(bundleSku, bundleItem.Quantity);
+        }
+      });
     }
   });
 }
 
+function addBundleItem(bundleSku, quantity) {
+  const row = $('<div class="sku-row">').append(
+    $('<select required class="form-control sku-select">').append(`<option value="${bundleSku.ItemCode}">${bundleSku.DisplayName}</option>`),
+    $('<input type="number" min="1" placeholder="Qty" required class="form-control qty-input" style="width: 90px;" value="'+quantity+'">'),
+    $('<button type="button" class="btn btn-danger">Delete</button>').click(function() { $(this).parent().remove(); })
+  );
+  $('#skuList').append(row);
+  row.find('select').select2({
+    matcher: function(params, data) {
+      if ($.trim(params.term) === '') return data;
+      if (typeof data.text === 'undefined') return null;
+      if (data.text.toLowerCase().indexOf(params.term.toLowerCase()) > -1) return data;
+      return null;
+    }
+  });
+}
 function validateForm() {
   let isValid = true;
   const requiredFields = ['#name', '#address1', '#city', '#state', '#zip', '#sampleType', '#country', '#shippingMethod'];
@@ -167,7 +232,13 @@ function generateCSV() {
   $('#skuList > .sku-row').each(function() {
     const sku = $(this).find('select').val();
     const quantity = $(this).find('input').val();
-    csvContent += `${externalId},${poNumber},${sampleType},${date},${shippingMethod},${country},${name},${address1},${address2},${attentionLine},${city},${state},${zip},${location},${sku},${quantity},0\n`;
+    if (bundleContents[sku]) {
+      bundleContents[sku].forEach(item => {
+        csvContent += `${externalId},${poNumber},${sampleType},${date},${shippingMethod},${country},${name},${address1},${address2},${attentionLine},${city},${state},${zip},${location},${item.ItemCode},${item.Quantity * quantity},0\n`;
+      });
+    } else {
+      csvContent += `${externalId},${poNumber},${sampleType},${date},${shippingMethod},${country},${name},${address1},${address2},${attentionLine},${city},${state},${zip},${location},${sku},${quantity},0\n`;
+    }
   });
 
   downloadCSV(csvContent, `Sample Request ${poNumber}.csv`);
@@ -175,11 +246,12 @@ function generateCSV() {
 }
 
 function downloadCSV(csvContent, filename) {
-  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.setAttribute('href', url);
   a.setAttribute('download', filename);
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

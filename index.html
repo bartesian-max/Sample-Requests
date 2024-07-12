@@ -83,6 +83,9 @@
       font-weight: bold;
       color: green;
     }
+    .form-control::placeholder {
+      color: lightgray;
+    }
   </style>
 </head>
 <body>
@@ -124,33 +127,33 @@
                 </div>
                 <div class="form-group">
                   <label for="attentionLine" class="font-weight-bold">Attention Line:</label>
-                  <input type="text" id="attentionLine" name="attentionLine" class="form-control">
+                  <input type="text" id="attentionLine" name="attentionLine" class="form-control" placeholder="Optional">
                 </div>
                 <div class="form-group">
                   <label for="name" class="font-weight-bold">Name:</label>
-                  <input type="text" id="name" name="name" class="form-control" required>
+                  <input type="text" id="name" name="name" class="form-control" required placeholder="Required">
                 </div>
                 <div class="form-group">
                   <label for="address1" class="font-weight-bold">Address Line 1:</label>
-                  <input type="text" id="address1" name="address1" class="form-control" required>
+                  <input type="text" id="address1" name="address1" class="form-control" required placeholder="Required">
                 </div>
               </div>
               <div class="col-md-6 form-column">
                 <div class="form-group">
                   <label for="address2" class="font-weight-bold">Address Line 2:</label>
-                  <input type="text" id="address2" name="address2" class="form-control">
+                  <input type="text" id="address2" name="address2" class="form-control" placeholder="Optional">
                 </div>
                 <div class="form-group">
                   <label for="city" class="font-weight-bold">City:</label>
-                  <input type="text" id="city" name="city" class="form-control" required>
+                  <input type="text" id="city" name="city" class="form-control" required placeholder="Required">
                 </div>
                 <div class="form-group">
                   <label for="state" class="font-weight-bold">State:</label>
-                  <input type="text" id="state" name="state" class="form-control" required>
+                  <input type="text" id="state" name="state" class="form-control" required placeholder="Required">
                 </div>
                 <div class="form-group">
                   <label for="zip" class="font-weight-bold">Zip Code:</label>
-                  <input type="text" id="zip" name="zip" class="form-control" required>
+                  <input type="text" id="zip" name="zip" class="form-control" required placeholder="Required">
                 </div>
                 <div class="form-group">
                   <label for="shippingMethod" class="font-weight-bold">Shipping Method:</label>
