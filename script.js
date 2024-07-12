@@ -126,7 +126,7 @@ function addSkuRow() {
     allOptions.map(sku => `<option value="${sku.ItemCode}">${sku.DisplayName}</option>`)
   );
   const quantityInput = $('<input type="number" min="1" placeholder="Qty" required class="form-control qty-input" style="width: 90px;">');
-  const deleteButton = $('<button type="button" class="btn btn-danger">Delete</button>').click(function() {
+  const deleteButton = $('<button type="button" class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>').click(function() {
     $(this).parent().remove();
   });
 
@@ -160,7 +160,7 @@ function addBundleItem(bundleSku, quantity) {
   const row = $('<div class="sku-row">').append(
     $('<select required class="form-control sku-select">').append(`<option value="${bundleSku.ItemCode}">${bundleSku.DisplayName}</option>`),
     $('<input type="number" min="1" placeholder="Qty" required class="form-control qty-input" style="width: 90px;" value="'+quantity+'">'),
-    $('<button type="button" class="btn btn-danger">Delete</button>').click(function() { $(this).parent().remove(); })
+    $('<button type="button" class="btn btn-danger"><i class="fas fa-trash-alt"></i></button>').click(function() { $(this).parent().remove(); })
   );
   $('#skuList').append(row);
   row.find('select').select2({
@@ -258,5 +258,6 @@ function downloadCSV(csvContent, filename) {
 }
 
 function showSuccessMessage(poNumber) {
-  $('#successMessage').text(`Thank you! Your order number is: ${poNumber}`).show();
+  $('#orderNumber').text(poNumber);
+  $('#successMessage').show();
 }
