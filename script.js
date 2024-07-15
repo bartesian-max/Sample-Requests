@@ -4,19 +4,20 @@ let selectedUserName = '';
 let currentSkus = [];
 let currentBundles = [];
 
-const usStates = [
-  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'Florida', 
-  'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 
-  'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 
-  'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 
-  'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 
-  'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-];
+const usStates = {
+  'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA', 'Colorado': 'CO', 'Connecticut': 'CT', 
+  'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA', 'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA', 
+  'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD', 'Massachusetts': 'MA', 'Michigan': 'MI', 
+  'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO', 'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 
+  'New Jersey': 'NJ', 'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH', 'Oklahoma': 'OK', 
+  'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC', 'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 
+  'Utah': 'UT', 'Vermont': 'VT', 'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
+};
 
-const caProvinces = [
-  'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 'Newfoundland and Labrador', 'Nova Scotia', 
-  'Ontario', 'Prince Edward Island', 'Quebec', 'Saskatchewan'
-];
+const caProvinces = {
+  'Alberta': 'AB', 'British Columbia': 'BC', 'Manitoba': 'MB', 'New Brunswick': 'NB', 'Newfoundland and Labrador': 'NL', 
+  'Nova Scotia': 'NS', 'Ontario': 'ON', 'Prince Edward Island': 'PE', 'Quebec': 'QC', 'Saskatchewan': 'SK'
+};
 
 $(document).ready(function() {
   loadSkuData();
@@ -53,7 +54,6 @@ function proceed() {
     alert('Please select your name to proceed.');
   }
 }
-
 function loadSkuData() {
   Papa.parse('SKUs.csv', {
     download: true,
@@ -61,7 +61,6 @@ function loadSkuData() {
     complete: function(results) {
       console.log("SKU Data Loaded:", results.data);
       results.data.forEach(row => {
-        console.log(row);
         if (row.DisplayNameUSA && row.ItemCodeUSA) {
           let isBundleUSA = row.IsBundleUSA && row.IsBundleUSA.trim().toLowerCase() === 'true';
           if (isBundleUSA) {
@@ -134,12 +133,11 @@ function updateLocationAndShippingMethod(country) {
 function updateStateOptions(country) {
   $('#state').empty();
   const options = country === 'Canada' ? caProvinces : usStates;
-  options.forEach(state => {
-    $('#state').append(new Option(state, state));
+  Object.keys(options).forEach(state => {
+    $('#state').append(new Option(state, options[state]));
   });
   $('#state').val(null).trigger('change'); // Reset and initialize the select2 dropdown
 }
-
 function updateSkuOptions(country) {
   currentSkus = skuData[country] || [];
   currentBundles = skuData["Bundles"][country] || [];
@@ -201,6 +199,7 @@ function addBundleItem(bundleSku, quantity) {
     }
   });
 }
+
 function validateForm() {
   let isValid = true;
   const requiredFields = ['#name', '#address1', '#city', '#state', '#zip', '#sampleType', '#country', '#shippingMethod'];
@@ -239,7 +238,7 @@ function generateCSV() {
   const address2 = $('#address2').val();
   const city = $('#city').val();
   const state = $('#state').val();
-  const zip = $('#zip').val();
+  const zip = `'${$('#zip').val()}`;  // Prepend apostrophe to ZIP code
   const attentionLine = $('#attentionLine').val();
   const sampleType = $('#sampleType').val();
   const shippingMethod = $('#shippingMethod').val();
