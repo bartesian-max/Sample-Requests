@@ -240,6 +240,30 @@ function checkQuantitiesOverLimit() {
   return overLimitItems;
 }
 
+function sanitizeInput(input) {
+  // Step 1: Decode HTML entities
+  const textArea = document.createElement('textarea');
+  textArea.innerHTML = input;
+  let decodedInput = textArea.value;
+  
+  // Step 2: Replace problematic characters and convert HTML entities
+  decodedInput = decodedInput
+    .replace(/[\u00A0-\u9999<>\&]/g, function(i) {
+      return '&#' + i.charCodeAt(0) + ';';
+    })
+    .replace(/&amp;/g, '&') // Convert &amp; back to &
+    .replace(/&#174;/g, '®') // Replace ® symbol
+    .replace(/&#8217;/g, "'") // Replace smart quote
+    .replace(/&#8211;/g, "-") // Replace en dash
+    .replace(/&#8220;/g, '"') // Replace left double quote
+    .replace(/&#8221;/g, '"') // Replace right double quote
+    .replace(/&#160;/g, ' ') // Replace non-breaking space with regular space
+    .replace(/&nbsp;/g, ' '); // Also replace &nbsp; with regular space
+
+  // Step 3: Normalize Unicode characters
+  return decodedInput.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
 function generateCSV() {
   if (!validateForm()) {
     alert('Please fill in all required fields.');
@@ -258,14 +282,14 @@ function generateCSV() {
     }
   }
 
-  const name = $('#name').val();
-  const address1 = $('#address1').val();
-  const address2 = $('#address2').val();
-  const city = $('#city').val();
+  const name = sanitizeInput($('#name').val());
+  const address1 = sanitizeInput($('#address1').val());
+  const address2 = sanitizeInput($('#address2').val());
+  const city = sanitizeInput($('#city').val());
   const state = $('#state').val();
   const zip = $('#zip').val();
-  const attentionLine = $('#attentionLine').val();
-  const sampleType = $('#sampleType').val();
+  const attentionLine = sanitizeInput($('#attentionLine').val());
+  const sampleType = sanitizeInput($('#sampleType').val());
   const shippingMethod = $('#shippingMethod').val();
   const country = $('#country').val();
   const location = (country === 'Canada') ? 'Shipbob - Brampton FC' : 'Tagg - Bolingbrook FC';
@@ -280,7 +304,8 @@ function generateCSV() {
   const poNumber = `${selectedUserName}-${year}${dayOfYear}-${Math.floor(100 + Math.random() * 900)}`;
   const externalId = `SO${Math.floor(100000 + Math.random() * 900000)}`;
 
-  let csvContent = `External ID,PO #,Customer,Date,Shipping Method,Country,Addressee,Address 1,Address 2,Attention,City,State,ZIP,Location,Item,Qty,Rate\n`;
+  let csvContent = '\ufeff'; // Add BOM for UTF-8
+  csvContent += `External ID,PO #,Customer,Date,Shipping Method,Country,Addressee,Address 1,Address 2,Attention,City,State,ZIP,Location,Item,Qty,Rate\n`;
 
   $('#skuList > .sku-row').each(function() {
     const sku = $(this).find('select').val();
