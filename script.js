@@ -227,10 +227,35 @@ function validateForm() {
   return isValid;
 }
 
+function checkQuantitiesOverLimit() {
+  let overLimitItems = [];
+  $('#skuList .sku-row').each(function() {
+    const sku = $(this).find('select').val();
+    const quantity = parseInt($(this).find('input').val(), 10);
+    if (quantity > 5) {
+      const skuText = $(this).find('select option:selected').text();
+      overLimitItems.push({ skuText, quantity });
+    }
+  });
+  return overLimitItems;
+}
+
 function generateCSV() {
   if (!validateForm()) {
     alert('Please fill in all required fields.');
     return;
+  }
+
+  const overLimitItems = checkQuantitiesOverLimit();
+  if (overLimitItems.length > 0) {
+    let warningMessage = 'The following items have quantities over 5:\n';
+    overLimitItems.forEach(item => {
+      warningMessage += `${item.skuText}: ${item.quantity}\n`;
+    });
+    warningMessage += 'Are you sure you want to proceed?';
+    if (!confirm(warningMessage)) {
+      return;
+    }
   }
 
   const name = $('#name').val();
@@ -238,7 +263,7 @@ function generateCSV() {
   const address2 = $('#address2').val();
   const city = $('#city').val();
   const state = $('#state').val();
-  const zip = `'${$('#zip').val()}`;  // Prepend apostrophe to ZIP code
+  const zip = $('#zip').val();
   const attentionLine = $('#attentionLine').val();
   const sampleType = $('#sampleType').val();
   const shippingMethod = $('#shippingMethod').val();
